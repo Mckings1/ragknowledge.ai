@@ -45,43 +45,43 @@ export default function Home() {
       <main className="flex-1 overflow-auto">
         {/* ===== HERO SECTION ===== */}
         {/* Large banner with headline, subheading, and call-to-action buttons */}
-        <section className="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-8 py-16">
-          <div className="max-w-5xl">
-            <h1 className="text-6xl font-bold text-white mb-6">
-              Your private{" "}
-              <span className="bg-gradient-to-r from-slate-400 to-slate-300 bg-clip-text text-transparent">
-                research assistant
-              </span>
-            </h1>
+        <section className="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  <div className="max-w-6xl mx-auto px-8 py-16">
+    <div className="text-center max-w-3xl mx-auto animate-fade-in">
+      <h1 className="text-6xl font-bold text-white mb-6">
+        Your private{" "}
+        <span className="bg-gradient-to-r from-slate-400 to-slate-300 bg-clip-text text-transparent">
+          research assistant
+        </span>
+      </h1>
+      <p className="text-xl text-slate-300 mb-10 leading-relaxed">
+        Transform your research workflow with AI that understands your documents. Get precise answers, discover
+        insights, and accelerate your research process.
+      </p>
+      <div className="flex gap-4 justify-center">
+        <Link href="/upload">
+          <Button
+            size="lg"
+            className="bg-[#6b7280] hover:bg-[#5a6370] text-white font-semibold px-8 py-4 rounded-xl flex items-center gap-3 shadow-lg"
+          >
+            <UploadCloud className="w-5 h-5" />
+            Upload Documents
+          </Button>
+        </Link>
+        <Button
+          size="lg"
+          variant="outline"
+          className="border-[#6b7280] text-white hover:bg-[#4b5563]/50 bg-[#4b5563]/30 font-semibold px-8 py-4 rounded-xl flex items-center gap-3"
+        >
+          <Play className="w-5 h-5" />
+          Watch Demo
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
 
-            {/* Subheading describing the value proposition */}
-            <p className="text-xl text-slate-300 mb-10 max-w-3xl leading-relaxed">
-              Transform your research workflow with AI that understands your documents. Get precise answers, discover
-              insights, and accelerate your research process.
-            </p>
 
-            {/* Primary and secondary call-to-action buttons */}
-            <div className="flex gap-4">
-              <Link href="/upload">
-                <Button
-                  size="lg"
-                  className="bg-[#6b7280] hover:bg-[#5a6370] text-white font-semibold px-8 py-4 rounded-xl flex items-center gap-3 shadow-lg"
-                >
-                  <UploadCloud className="w-5 h-5" />
-                  Upload Documents
-                </Button>
-              </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-[#6b7280] text-white hover:bg-[#4b5563]/50 bg-[#4b5563]/30 font-semibold px-8 py-4 rounded-xl flex items-center gap-3"
-              >
-                <Play className="w-5 h-5" />
-                Watch Demo
-              </Button>
-            </div>
-          </div>
-        </section>
 
         {/* ===== FEATURES SECTION ===== */}
         {/* Three feature cards highlighting key benefits */}
@@ -130,7 +130,7 @@ export default function Home() {
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-white">Recent Activity</h2>
               <Link
-                href="/chat-history"
+                href="/chat"
                 className="text-slate-400 hover:text-slate-300 flex items-center gap-2 font-medium"
               >
                 View All <ArrowRight className="w-4 h-4" />
