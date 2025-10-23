@@ -32,12 +32,12 @@ export default function Home() {
       date: "Asked 1 hour ago",
       sources: "3 sources referenced",
       status: "Answered",
-      statusColor: "bg-slate-600",
+      statusColor: "bg-[#4b5563]/30",
     },
   ])
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="flex h-screen background from-slate-950 via-slate-900 to-slate-950">
       {/* Sidebar Navigation */}
       <Sidebar />
 
@@ -45,14 +45,11 @@ export default function Home() {
       <main className="flex-1 overflow-auto">
         {/* ===== HERO SECTION ===== */}
         {/* Large banner with headline, subheading, and call-to-action buttons */}
-        <section className="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <section className="border-b border-slate-800 background from-slate-900 via-slate-800 to-slate-900">
   <div className="max-w-6xl mx-auto px-8 py-16">
     <div className="text-center max-w-3xl mx-auto animate-fade-in">
       <h1 className="text-6xl font-bold text-white mb-6">
-        Your private{" "}
-        <span className="bg-gradient-to-r from-slate-400 to-slate-300 bg-clip-text text-transparent">
-          research assistant
-        </span>
+        Your private research assistant
       </h1>
       <p className="text-xl text-slate-300 mb-10 leading-relaxed">
         Transform your research workflow with AI that understands your documents. Get precise answers, discover
@@ -80,15 +77,12 @@ export default function Home() {
     </div>
   </div>
 </section>
-
-
-
         {/* ===== FEATURES SECTION ===== */}
         {/* Three feature cards highlighting key benefits */}
         <section className="px-8 py-16 border-b border-slate-800">
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl">
             {/* Feature 1: Privacy */}
-            <div className="glass-card rounded-2xl p-8 bg-slate-800/40 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
+            <div className="glass-card rounded-2xl p-8 bg-[#4b5563]/30 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
               <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <Lock className="w-8 h-8 text-white" />
               </div>
@@ -99,7 +93,7 @@ export default function Home() {
             </div>
 
             {/* Feature 2: Speed */}
-            <div className="glass-card rounded-2xl p-8 bg-slate-800/40 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
+            <div className="glass-card rounded-2xl p-8 bg-[#4b5563]/30 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
               <div className="w-16 h-16 bg-[#6b7280] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <Zap className="w-8 h-8 text-white" />
               </div>
@@ -110,7 +104,7 @@ export default function Home() {
             </div>
 
             {/* Feature 3: Accuracy */}
-            <div className="glass-card rounded-2xl p-8 bg-slate-800/40 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
+            <div className="glass-card rounded-2xl p-8 bg-[#4b5563]/30 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
               <div className="w-16 h-16 bg-[#4b5563] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <Target className="w-8 h-8 text-white" />
               </div>
@@ -142,12 +136,12 @@ export default function Home() {
               {recentActivity.map((item) => (
                 <div
                   key={item.id}
-                  className="glass-card rounded-xl p-6 bg-slate-800/40 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200 flex items-center justify-between"
+                  className="glass-card rounded-xl p-6 bg-[#4b5563]/30 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200 flex items-center justify-between"
                 >
                   {/* Activity icon and details */}
                   <div className="flex items-center gap-4 flex-1">
                     <div
-                      className={`w-12 h-12 ${item.type === "document" ? "bg-red-600" : "bg-slate-600"} rounded-xl flex items-center justify-center`}
+                      className={`w-12 h-12 ${item.type === "document" ? "bg-red-600" : "bg-[#4b5563]/30"} rounded-xl flex items-center justify-center`}
                     >
                       {item.type === "document" ? (
                         <FileText className="w-6 h-6 text-white" />
@@ -185,13 +179,13 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-8">
               {/* Quick Upload Card */}
               <Link href="/upload">
-                <div className="glass-card rounded-2xl p-8 bg-slate-800/40 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200 cursor-pointer h-full">
+                <div className="glass-card rounded-2xl p-8 bg-[#4b5563]/30 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200 cursor-pointer h-full">
                   <div className="w-12 h-12 bg-[#6b7280] rounded-xl flex items-center justify-center mb-6">
                     <UploadCloud className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-3">Quick Upload</h3>
                   <p className="text-slate-300 mb-6">Drag and drop your research documents to get started instantly.</p>
-                  <Button variant="outline" className="border-slate-600 text-white hover:bg-slate-700 bg-transparent">
+                  <Button variant="outline" className="border-[#1b1d22] text-white hover:bg-[#0f1115] bg-transparent">
                     Choose Files
                   </Button>
                 </div>
@@ -199,7 +193,7 @@ export default function Home() {
 
               {/* Smart Search Card */}
               <Link href="/chat">
-                <div className="glass-card rounded-2xl p-8 bg-slate-800/40 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200 cursor-pointer h-full">
+                <div className="glass-card rounded-2xl p-8 bg-[#4b5563]/30 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200 cursor-pointer h-full">
                   <div className="w-12 h-12 bg-[#4b5563] rounded-xl flex items-center justify-center mb-6">
                     <MessageSquare className="w-6 h-6 text-white" />
                   </div>
@@ -207,7 +201,7 @@ export default function Home() {
                   <p className="text-slate-300 mb-6">
                     Ask questions in natural language and get precise answers with citations.
                   </p>
-                  <Button variant="outline" className="border-slate-600 text-white hover:bg-slate-700 bg-transparent">
+                  <Button variant="outline" className="border-slate-600 text-white hover:bg-[#0f1115] bg-transparent">
                     Start Searching
                   </Button>
                 </div>

@@ -1,242 +1,219 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Sidebar } from "@/components/sidebar"
-import { Button } from "@/components/ui/button"
-import { Upload, File, X, CheckCircle, AlertCircle, Loader } from "lucide-react"
+import { useState, useRef } from "react";
+import { Sidebar } from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Upload as UploadIcon,
+  FileText,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
 
-/**
- * UploadedFile Interface
- * Represents a file being uploaded with status and progress tracking
- */
 interface UploadedFile {
-  id: string
-  name: string
-  size: string
-  status: "uploading" | "processing" | "completed" | "error"
-  progress: number
+  id: number;
+  name: string;
+  progress: number;
+  status: "processing" | "complete";
 }
 
-/**
- * Upload Page Component
- * Drag-and-drop file upload interface with progress tracking
- * Supports batch uploads and displays processing status
- */
-export default function UploadPage() {
-  // Sample uploaded files with various statuses
-  const [files, setFiles] = useState<UploadedFile[]>([
-    {
-      id: "1",
-      name: "AI_Research_Methods_2024.pdf",
-      size: "3.2 MB",
-      status: "completed",
-      progress: 100,
-    },
-    {
-      id: "2",
-      name: "Neural_Networks_Guide.pdf",
-      size: "2.8 MB",
-      status: "completed",
-      progress: 100,
-    },
-  ])
+export default function Upload() {
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [title, setTitle] = useState("");
+  const [tags, setTags] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [isDragging, setIsDragging] = useState(false)
+  const handleFileSelect = (selectedFiles: FileList | null) => {
+    if (!selectedFiles) return;
 
-  // Handle drag over event
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    const newFiles: UploadedFile[] = Array.from(selectedFiles).map(
+      (file, index) => ({
+        id: Date.now() + index,
+        name: file.name,
+        progress: 0,
+        status: "processing" as const,
+      })
+    );
 
-  // Handle drag leave event
-  const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setFiles((prev) => [...prev, ...newFiles]);
 
-  // Handle file drop
+    // Simulate upload progress
+    newFiles.forEach((file) => {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 15;
+        if (progress >= 100) {
+          clearInterval(interval);
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === file.id
+                ? { ...f, progress: 100, status: "complete" }
+                : f
+            )
+          );
+          toast.success(`${file.name} uploaded successfully!`);
+        } else {
+          setFiles((prev) =>
+            prev.map((f) => (f.id === file.id ? { ...f, progress } : f))
+          );
+        }
+      }, 300);
+    });
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    // Handle file drop logic here
-  }
+    e.preventDefault();
+    setIsDragging(false);
+    handleFileSelect(e.dataTransfer.files);
+  };
 
-  // Handle file selection from input
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files
-    if (selectedFiles) {
-      // Handle file selection logic here
-    }
-  }
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
-  // Remove file from list
-  const removeFile = (id: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id))
-  }
-
-  /**
-   * Get status icon based on file status
-   */
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="w-5 h-5 text-green-400" />
-      case "error":
-        return <AlertCircle className="w-5 h-5 text-red-400" />
-      case "processing":
-        return <Loader className="w-5 h-5 text-blue-400 animate-spin" />
-      default:
-        return <File className="w-5 h-5 text-slate-400" />
-    }
-  }
-
-  /**
-   * Get status badge color based on file status
-   */
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-900/30 text-green-300 border border-green-700/50"
-      case "error":
-        return "bg-red-900/30 text-red-300 border border-red-700/50"
-      case "processing":
-        return "bg-blue-900/30 text-blue-300 border border-blue-700/50"
-      default:
-        return "bg-slate-700/30 text-slate-300 border border-slate-600/50"
-    }
-  }
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Sidebar Navigation */}
+    <div className="flex min-h-screen background from-[#0b0b0b] via-[#111] to-[#181818] text-gray-100">
+      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
+      {/* Main content */}
       <main className="flex-1 overflow-auto">
-        {/* ===== PAGE HEADER ===== */}
-        {/* Title and description */}
-        <div className="border-b border-slate-700/50 bg-slate-800/40 backdrop-blur px-8 py-6 sticky top-0 z-10">
-          <h1 className="text-3xl font-bold text-white mb-2">Upload Documents</h1>
-          <p className="text-slate-400">Add research papers, PDFs, and documents to your library</p>
+        {/* Header */}
+        <div className="border-b border-white/10 bg-[#4b5563]/30 backdrop-blur-md px-8 py-6 sticky top-0 z-10">
+          <h1 className="text-3xl font-bold mb-2">Upload Documents</h1>
+          <p className="text-gray-400">
+            Add files to your research library. Supported: PDF, DOCX, TXT, MD.
+          </p>
         </div>
 
-        {/* ===== CONTENT AREA ===== */}
-        <div className="p-8 max-w-6xl">
-          {/* ===== UPLOAD ZONE ===== */}
-          {/* Drag-and-drop area for file uploads */}
+        {/* Content area */}
+        <div className="p-8 max-w-5xl mx-auto ">
+          {/* Upload zone */}
           <div
+            className={`mb-8 p-12 rounded-xl border-2 border-dashed transition-all cursor-pointer glass ${
+              isDragging
+                ? "border-white/30 bg-white/10"
+                : "border-white/10 hover:border-white/20 bg-white/5"
+            }`}
+            onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-2xl p-16 text-center transition-all duration-300 mb-8 ${
-              isDragging
-                ? "border-[#9ca3af] bg-[#6b7280]/20 backdrop-blur"
-                : "border-slate-600/50 bg-slate-800/40 hover:border-[#9ca3af] hover:bg-[#6b7280]/20"
-            }`}
+            onClick={openFilePicker}
           >
-            {/* Upload icon */}
-            <div className="w-20 h-20 bg-[#6b7280] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Upload className="w-10 h-10 text-white" />
-            </div>
+            <div className="text-center ">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UploadIcon className="w-8 h-8 text-gray-300" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 ">
+                Drop files here or click to browse
+              </h3>
+              <p className="text-sm text-gray-400 mb-6">
+                Maximum file size: 50MB per file • Batch upload supported
+              </p>
 
-            {/* Upload instructions */}
-            <h3 className="text-2xl font-bold text-white mb-4">Drag and drop your files here</h3>
-            <p className="text-slate-400 mb-8">or click to browse from your computer</p>
-
-            {/* File input and select button */}
-            <input
-              type="file"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-              id="file-input"
-              accept=".pdf,.doc,.docx,.txt,.md"
-            />
-            <label htmlFor="file-input">
-              <Button asChild className="bg-slate-600 hover:bg-slate-700 text-white font-semibold px-8 py-4 rounded-lg">
-                <span>Select Files</span>
+              <Button onClick={openFilePicker} className="upload-btn bg-[#6b7280] hover:bg-[#5a6370] text-white font-semibold">
+                Select Files
               </Button>
-            </label>
-
-            {/* File format info */}
-            <p className="text-xs text-slate-500 mt-6">Supported formats: PDF, DOC, DOCX, TXT, MD (Max 50MB each)</p>
+              <input
+                ref={fileInputRef}
+                id="file-input"
+                type="file"
+                multiple
+                className="hidden"
+                accept=".pdf,.docx,.txt,.md"
+                onChange={(e) => handleFileSelect(e.target.files)}
+              />
+            </div>
           </div>
 
-          {/* ===== UPLOADED FILES LIST ===== */}
-          {/* Display uploaded files with progress and status */}
-          {files.length > 0 && (
+          {/* Metadata */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Upload Progress</h2>
+              <label className="block text-sm font-medium mb-2">
+                Document Title (Optional)
+              </label>
+              <Input
+                placeholder="Enter document title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Tags (Optional)
+              </label>
+              <Input
+                placeholder="research, methodology, analysis"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Upload progress */}
+          {files.length > 0 && (
+            <div className="p-6 rounded-xl glass">
+              <h3 className="text-lg font-semibold mb-4">Upload Progress</h3>
               <div className="space-y-4">
                 {files.map((file) => (
                   <div
                     key={file.id}
-                    className="bg-slate-800/40 backdrop-blur border border-slate-700/50 rounded-xl p-6 hover:border-slate-600/50 transition-all duration-200"
+                    className="flex items-center gap-4 p-4 rounded-lg bg-white/5"
                   >
-                    {/* File info row */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-4 flex-1">
-                        {/* Status icon */}
-                        {getStatusIcon(file.status)}
-
-                        {/* File details */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-white truncate">{file.name}</h4>
-                          <p className="text-xs text-slate-400 mt-1">{file.size}</p>
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-5 h-5 text-gray-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium truncate">{file.name}</p>
+                        <div className="flex items-center gap-2">
+                          {file.status === "complete" ? (
+                            <>
+                              <CheckCircle2 className="w-4 h-4 text-green-400" />
+                              <span className="text-sm text-green-400 font-medium">
+                                Indexed
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                              <span className="text-sm text-gray-400 font-medium">
+                                {file.progress}%
+                              </span>
+                            </>
+                          )}
                         </div>
                       </div>
-
-                      {/* Status badge and remove button */}
-                      <div className="flex items-center gap-3 ml-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(file.status)}`}>
-                          {file.status === "completed"
-                            ? "Processed"
-                            : file.status === "processing"
-                              ? "Processing"
-                              : file.status === "uploading"
-                                ? "Uploading"
-                                : "Error"}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeFile(file.id)}
-                          className="text-slate-400 hover:text-red-400 hover:bg-slate-700/40 rounded-lg"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
+                      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            file.status === "complete"
+                              ? "bg-green-400"
+                              : "bg-gray-400"
+                          }`}
+                          style={{ width: `${file.progress}%` }}
+                        />
                       </div>
                     </div>
-
-                    {/* Progress bar for uploading/processing files */}
-                    {file.progress < 100 && (
-                      <div className="w-full bg-slate-700/40 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-slate-500 to-slate-400 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${file.progress}%` }}
-                        ></div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* ===== INFO BOX ===== */}
-          {/* Tips for best results */}
-          <div className="mt-8 p-6 bg-slate-700/20 backdrop-blur border border-slate-600/50 rounded-xl">
-            <h3 className="font-semibold text-slate-200 mb-3">Tips for best results</h3>
-            <ul className="text-sm text-slate-300 space-y-2">
-              <li>• Upload clear, readable documents for better processing</li>
-              <li>• PDFs with text layers work best (avoid scanned images)</li>
-              <li>• You can upload multiple files at once</li>
-              <li>• All documents are processed securely and privately</li>
-            </ul>
-          </div>
         </div>
       </main>
     </div>
-  )
+  );
 }
