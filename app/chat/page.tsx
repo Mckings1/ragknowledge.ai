@@ -1,45 +1,43 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, Paperclip, Loader } from "lucide-react"
+import { Send, Paperclip, Loader2 } from "lucide-react"
 
-/**
- * Message Interface
- * Defines the structure of chat messages with role, content, and optional sources
- */
+// ============================
+// Message Interface
+// ============================
 interface Message {
   id: string
   role: "user" | "assistant"
   content: string
   timestamp: Date
-  sources?: string[]
+  sources?: Array<{ title: string; pages: string }>
+  isLoading?: boolean
 }
 
-/**
- * Chat Page Component
- * Interactive chat interface for asking questions about uploaded documents
- * Features message history, source citations, and real-time typing indicators
- */
-export default function ChatPage() {
-  // Initial welcome message from the assistant
+// ============================
+// Chat Component
+// ============================
+const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       role: "assistant",
       content:
-        "Hello! I'm your Research AI Assistant. Upload documents and ask me questions about them. I'll provide precise answers with citations from your sources.",
+        "Hello! I'm your Research AI Assistant. Upload your documents and ask me questions about them. I’ll provide clear answers with source references.",
       timestamp: new Date(),
     },
   ])
-
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // ============================
   // Auto-scroll to latest message
+  // ============================
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -48,14 +46,12 @@ export default function ChatPage() {
     scrollToBottom()
   }, [messages])
 
-  /**
-   * Handle sending a message
-   * Adds user message to chat, simulates AI response with sources
-   */
-  const handleSendMessage = async () => {
+  // ============================
+  // Handle Sending Message
+  // ============================
+  const handleSend = async () => {
     if (!input.trim()) return
 
-    // Create user message
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -63,51 +59,75 @@ export default function ChatPage() {
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    const loadingMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+      isLoading: true,
+    }
+
+    setMessages((prev) => [...prev, userMessage, loadingMessage])
     setInput("")
     setIsLoading(true)
 
-    // Simulate AI response with delay
+    // =======================================
+    // Simulate AI response (mock)
+    // =======================================
+    // TODO: Replace this section with a real Azure AI call later:
+    // Example: call Azure Function or Semantic Kernel endpoint here
+    //
+    // const response = await fetch("/api/ask", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ query: input }),
+    // })
+    // const data = await response.json()
+    //
+    // Then use: data.answer, data.sources, etc.
+    // =======================================
+
     setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content:
-          "Based on the documents you've uploaded, I found relevant information. The key findings suggest that this topic is important for your research. Would you like me to provide more specific details or search for related information?",
-        timestamp: new Date(),
-        sources: ["AI_Research_Methods_2024.pdf", "Neural_Networks_Guide.pdf"],
-      }
-      setMessages((prev) => [...prev, assistantMessage])
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.isLoading
+            ? {
+                ...msg,
+                isLoading: false,
+                content:
+                  "Based on your uploaded research documents, I found relevant insights. Would you like me to expand on this topic or show related references?",
+                sources: [
+                  { title: "AI_Research_Methods_2024.pdf", pages: "Pages 10-14" },
+                  { title: "Neural_Networks_Guide.pdf", pages: "Pages 3-8" },
+                ],
+              }
+            : msg
+        )
+      )
       setIsLoading(false)
-    }, 1000)
+    }, 1500)
   }
 
+  // ============================
+  // JSX Render
+  // ============================
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="flex h-screen background from-slate-950 via-slate-900 to-slate-950">
       {/* Sidebar Navigation */}
       <Sidebar />
 
-      {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* ===== CHAT HEADER ===== */}
-        {/* Title and status indicator showing active documents */}
-        <div className="border-b border-slate-700/50 bg-slate-800/40 backdrop-blur px-8 py-6">
+      {/* Main Chat Section */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* ===== Header ===== */}
+        <div className="border-b border-slate-700/50 bg-[#4b5563]/30 backdrop-blur px-8 py-6">
           <h1 className="text-3xl font-bold text-white mb-2">Research Chat</h1>
           <p className="text-slate-400 mb-4">Ask questions about your uploaded documents</p>
-
-          {/* Status badge showing number of active documents */}
-          <div className="flex items-center gap-2 w-fit bg-[#4b5563]/40 backdrop-blur border border-[#6b7280]/50 px-4 py-2 rounded-lg">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-slate-300">12 documents active</span>
-          </div>
         </div>
 
-        {/* ===== MESSAGES CONTAINER ===== */}
-        {/* Scrollable area displaying chat history */}
+        {/* ===== Messages ===== */}
         <div className="flex-1 overflow-auto p-8 space-y-6">
           {messages.map((message) => (
             <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-              {/* Message bubble with role-specific styling */}
               <div
                 className={`max-w-2xl ${
                   message.role === "user"
@@ -115,21 +135,30 @@ export default function ChatPage() {
                     : "bg-[#4b5563]/60 backdrop-blur text-slate-100 rounded-2xl rounded-tl-none border border-[#6b7280]/50"
                 } p-6`}
               >
-                {/* Message content */}
-                <p className="text-sm leading-relaxed">{message.content}</p>
+                {/* Message Content */}
+                {message.isLoading ? (
+                  <div className="flex gap-2 items-center">
+                    <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+                    <span className="text-sm text-slate-400">Analyzing documents...</span>
+                  </div>
+                ) : (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                )}
 
-                {/* Source citations for assistant messages */}
-                {message.sources && message.sources.length > 0 && (
+                {/* Sources */}
+                {!message.isLoading && message.sources && message.sources.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-slate-600/50">
                     <p className="text-xs font-semibold text-slate-300 mb-3">Sources:</p>
                     <div className="space-y-2">
-                      {message.sources.map((source, idx) => (
+                      {message.sources.map((src, idx) => (
                         <div
                           key={idx}
                           className="flex items-center gap-2 p-2 bg-slate-700/30 rounded border border-slate-600/30"
                         >
                           <div className="w-2 h-2 bg-slate-400 rounded-full flex-shrink-0"></div>
-                          <p className="text-xs text-slate-400">{source}</p>
+                          <p className="text-xs text-slate-400 truncate">
+                            {src.title} — <span className="text-slate-500">{src.pages}</span>
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -144,34 +173,14 @@ export default function ChatPage() {
             </div>
           ))}
 
-          {/* Loading indicator - animated dots while waiting for response */}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-slate-800/60 backdrop-blur text-slate-100 rounded-2xl rounded-tl-none border border-slate-700/50 p-6">
-                <div className="flex gap-2">
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.4s" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Scroll anchor */}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ===== INPUT AREA ===== */}
-        {/* Message input field with attachment and send buttons */}
-        <div className="border-t border-slate-700/50 bg-slate-800/40 backdrop-blur p-6">
+        {/* ===== Input Section ===== */}
+        <div className="border-t border-slate-700/50 bg-[#4b5563]/30 backdrop-blur p-6">
           <div className="max-w-4xl mx-auto flex gap-3">
-            {/* Attachment button */}
+            {/* Attach button */}
             <Button
               variant="outline"
               size="icon"
@@ -180,26 +189,28 @@ export default function ChatPage() {
               <Paperclip className="w-5 h-5" />
             </Button>
 
-            {/* Message input field */}
+            {/* Input */}
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Ask a question about your documents..."
               className="bg-slate-700/40 border-slate-600/50 text-white placeholder:text-slate-500 rounded-lg focus:border-slate-500 focus:ring-slate-500"
             />
 
             {/* Send button */}
             <Button
-              onClick={handleSendMessage}
+              onClick={handleSend}
               disabled={!input.trim() || isLoading}
               className="bg-[#6b7280] hover:bg-[#5a6370] text-white flex-shrink-0 rounded-lg disabled:opacity-50"
             >
-              {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </Button>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
+
+export default Chat
