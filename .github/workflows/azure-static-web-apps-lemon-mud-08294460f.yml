@@ -23,23 +23,40 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'  # Matches Next.js requirement; 20.10.0 is fine
-          cache: 'npm'
+          node-version: '20.x'
+          cache: 'pnpm' # use pnpm cache when possible
 
-      - name: Install dependencies
+      - name: Ensure pnpm is installed
         run: |
-          # Check if package-lock.json exists, if not use npm install
-          if [ -f "package-lock.json" ]; then
+          # prefer official pnpm installer, fall back to npm if needed
+          if ! command -v pnpm >/dev/null 2>&1; then
+            echo "pnpm not found — installing..."
+            npm install -g pnpm
+          else
+            echo "pnpm already installed"
+          fi
+
+      - name: Install dependencies (pnpm if available, else npm)
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "Using pnpm (pnpm-lock.yaml found)"
+            pnpm install --frozen-lockfile
+          elif [ -f "package-lock.json" ]; then
+            echo "Using npm (package-lock.json found)"
             npm ci
           else
+            echo "No lockfile found — using npm install"
             npm install
           fi
 
       - name: Build Next.js app for static export
         run: |
-          # Set environment variable to avoid pnpm issues
           export NEXT_TELEMETRY_DISABLED=1
-          npm run build
+          if [ -f "pnpm-lock.yaml" ]; then
+            pnpm build
+          else
+            npm run build
+          fi
 
       - name: Build And Deploy
         id: builddeploy
@@ -47,17 +64,6 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_MUD_08294460F }}
           action: "upload"
-          app_location: "/"  # Root of Next.js app
-          api_location: ""  # No API
-          output_location: "out"  # Next.js static export output
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          action: "close"
+          app_location: "/"
+          api_location: ""
+          output_location: "out"
