@@ -23,11 +23,16 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'  # Matches Next.js requirement
+          node-version: '20.x'  # Matches Next.js requirement; 20.10.0 is fine
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci  # Faster and respects package-lock.json
+
+      - name: Build Next.js app for static export
+        run: |
+          npm run build
+          npm run export
 
       - name: Build And Deploy
         id: builddeploy
@@ -35,9 +40,9 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_MUD_08294460F }}
           action: "upload"
-          app_location: "/"
-          api_location: ""
-          output_location: ".next"  # Changed to match Next.js output
+          app_location: "/"  # Root of Next.js app
+          api_location: ""  # No API
+          output_location: "out"  # Next.js static export output
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
