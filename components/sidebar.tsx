@@ -40,8 +40,6 @@ export function Sidebar() {
             </div>
           </div>
         </Link>
-
-        
         
       </div>
 

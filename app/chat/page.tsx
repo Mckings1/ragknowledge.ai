@@ -119,9 +119,9 @@ const Chat = () => {
       {/* Main Chat Section */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* ===== Header ===== */}
-        <div className="border-b border-slate-700/50 bg-[#4b5563]/30 backdrop-blur px-8 py-6">
+        <div className="border-b border-slate-700/50 bg-[#4b5563]/30 backdrop-blur px-8 py-6 top-0 z-10">
           <h1 className="text-3xl font-bold text-white mb-2">Research Chat</h1>
-          <p className="text-slate-400 mb-4">Ask questions about your uploaded documents</p>
+          <p className="text-slate-400">Ask questions about your uploaded documents</p>
         </div>
 
         {/* ===== Messages ===== */}
