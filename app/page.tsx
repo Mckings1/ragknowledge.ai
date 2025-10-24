@@ -46,41 +46,41 @@ export default function Home() {
         {/* ===== HERO SECTION ===== */}
         {/* Large banner with headline, subheading, and call-to-action buttons */}
         <section className="border-b border-slate-800 background from-slate-900 via-slate-800 to-slate-900">
-  <div className="max-w-6xl mx-auto px-8 py-16">
-    <div className="text-center max-w-3xl mx-auto animate-fade-in">
-      <h1 className="text-6xl font-bold text-white mb-6">
-        Your private research assistant
-      </h1>
-      <p className="text-xl text-slate-300 mb-10 leading-relaxed">
-        Transform your research workflow with AI that understands your documents. Get precise answers, discover
-        insights, and accelerate your research process.
-      </p>
-      <div className="flex gap-4 justify-center">
-        <Link href="/upload">
-          <Button
-            size="lg"
-            className="bg-[#6b7280] hover:bg-[#5a6370] text-white font-semibold px-8 py-4 rounded-xl flex items-center gap-3 shadow-lg"
-          >
-            <UploadCloud className="w-5 h-5" />
-            Upload Documents
-          </Button>
-        </Link>
-        <Button
-          size="lg"
-          variant="outline"
-          className="border-[#6b7280] text-white hover:bg-[#4b5563]/50 bg-[#4b5563]/30 font-semibold px-8 py-4 rounded-xl flex items-center gap-3"
-        >
-          <Play className="w-5 h-5" />
-          Watch Demo
-        </Button>
-      </div>
-    </div>
-  </div>
-</section>
+          <div className="max-w-6xl px-8 py-16 mx-auto">
+            <div className="text-center max-w-3xl mx-auto animate-fade-in">
+              <h1 className="text-6xl font-bold text-white mb-6">
+                Your private research assistant
+              </h1>
+              <p className="text-xl text-slate-300 mb-10 leading-relaxed">
+                Transform your research workflow with AI that understands your documents. Get precise answers, discover
+                insights, and accelerate your research process.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Link href="/upload">
+                  <Button
+                    size="lg"
+                    className="bg-[#6b7280] hover:bg-[#5a6370] text-white font-semibold px-8 py-4 rounded-xl flex items-center gap-3 shadow-lg"
+                  >
+                    <UploadCloud className="w-5 h-5" />
+                    Upload Documents
+                  </Button>
+                </Link>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-[#6b7280] text-white hover:bg-[#4b5563]/50 bg-[#4b5563]/30 font-semibold px-8 py-4 rounded-xl flex items-center gap-3"
+                >
+                  <Play className="w-5 h-5" />
+                  Watch Demo
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
         {/* ===== FEATURES SECTION ===== */}
         {/* Three feature cards highlighting key benefits */}
-        <section className="px-8 py-16 border-b border-slate-800">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl">
+        <section className="px-8 py-16 border-b border-slate-800 mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Feature 1: Privacy */}
             <div className="glass-card rounded-2xl p-8 bg-[#4b5563]/30 backdrop-blur border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
               <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
@@ -118,8 +118,8 @@ export default function Home() {
 
         {/* ===== RECENT ACTIVITY SECTION ===== */}
         {/* Shows recent uploads and chat interactions */}
-        <section className="px-8 py-16 border-b border-slate-800">
-          <div className="max-w-6xl">
+        <section className="px-8 py-16 border-b border-slate-800 mx-auto">
+          <div className="max-w-6xl mx-auto">
             {/* Section header with "View All" link */}
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-white">Recent Activity</h2>
@@ -173,8 +173,8 @@ export default function Home() {
 
         {/* ===== QUICK ACTIONS SECTION ===== */}
         {/* Two prominent action cards for common tasks */}
-        <section className="px-8 py-16">
-          <div className="max-w-6xl">
+        <section className="px-8 py-16 mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-white mb-8">Quick Actions</h2>
             <div className="grid md:grid-cols-2 gap-8">
               {/* Quick Upload Card */}

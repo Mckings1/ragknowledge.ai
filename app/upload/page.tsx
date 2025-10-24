@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +13,15 @@ import {
 import { toast } from "sonner";
 
 interface UploadedFile {
-  id: number;
+  id: string;
   name: string;
+  title?: string;
+  tags?: string[];
+  size: string;
+  uploadedAt: string;
+  pages: number;
   progress: number;
-  status: "processing" | "complete";
+  status: "uploading" | "processing" | "completed";
 }
 
 export default function Upload() {
@@ -26,21 +31,50 @@ export default function Upload() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleFileSelect = (selectedFiles: FileList | null) => {
-    if (!selectedFiles) return;
+  useEffect(() => {
+    const storedFiles = localStorage.getItem("uploadedFiles");
+    if (storedFiles) {
+      try {
+        setFiles(JSON.parse(storedFiles));
+      } catch (e) {
+        console.error("Failed to parse uploadedFiles", e);
+      }
+    }
+  }, []);
 
-    const newFiles: UploadedFile[] = Array.from(selectedFiles).map(
-      (file, index) => ({
-        id: Date.now() + index,
-        name: file.name,
-        progress: 0,
-        status: "processing" as const,
+  useEffect(() => {
+    if (files.length > 0) {
+      localStorage.setItem("uploadedFiles", JSON.stringify(files));
+    }
+  }, [files]);
+
+  const handleFileSelect = (selectedFiles: FileList | null) => {
+    if (!selectedFiles || selectedFiles.length === 0) return;
+
+    const newFiles: UploadedFile[] = Array.from(selectedFiles)
+      .filter((file) => {
+        if (file.size > 50 * 1024 * 1024) {
+          toast.error(`${file.name} exceeds 50MB limit`);
+          return false;
+        }
+        return true;
       })
-    );
+      .map((file, index) => ({
+        id: `${Date.now()}-${index}`,
+        name: file.name,
+        title: title || file.name,
+        tags: tags ? tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [],
+        size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+        uploadedAt: new Date().toISOString(),
+        pages: Math.floor(Math.random() * 50) + 1,
+        progress: 0,
+        status: "uploading" as const,
+      }));
+
+    if (newFiles.length === 0) return;
 
     setFiles((prev) => [...prev, ...newFiles]);
 
-    // Simulate upload progress
     newFiles.forEach((file) => {
       let progress = 0;
       const interval = setInterval(() => {
@@ -50,21 +84,32 @@ export default function Upload() {
           setFiles((prev) =>
             prev.map((f) =>
               f.id === file.id
-                ? { ...f, progress: 100, status: "complete" }
+                ? { ...f, progress: 100, status: "completed" }
                 : f
             )
           );
           toast.success(`${file.name} uploaded successfully!`);
         } else {
           setFiles((prev) =>
-            prev.map((f) => (f.id === file.id ? { ...f, progress } : f))
+            prev.map((f) =>
+              f.id === file.id
+                ? { ...f, progress, status: progress < 50 ? "uploading" : "processing" }
+                : f
+            )
           );
         }
       }, 300);
     });
+
+    setTitle("");
+    setTags("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  const openFilePicker = () => {
+  const openFilePicker = (e: React.MouseEvent) => {
+    e.stopPropagation();
     fileInputRef.current?.click();
   };
 
@@ -84,46 +129,42 @@ export default function Upload() {
   };
 
   return (
-    <div className="flex min-h-screen background from-[#0b0b0b] via-[#111] to-[#181818] text-gray-100">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-gradient-to-b from-[#0b0b0b] via-[#111] to-[#181818] text-gray-100">
       <Sidebar />
-
-      {/* Main content */}
       <main className="flex-1 overflow-auto">
-        {/* Header */}
         <div className="border-b border-white/10 bg-[#4b5563]/30 backdrop-blur-md px-8 py-6 sticky top-0 z-10">
-          <h1 className="text-3xl font-bold mb-2">Upload Documents</h1>
-          <p className="text-gray-400">
-            Add files to your research library. Supported: PDF, DOCX, TXT, MD.
-          </p>
+          <div className="max-w-5xl mx-auto">
+            <h1 className="text-3xl font-bold mb-2">Upload Documents</h1>
+            <p className="text-gray-400">
+              Add files to your research library. Supported: PDF, DOCX, TXT, MD.
+            </p>
+          </div>
         </div>
-
-        {/* Content area */}
-        <div className="p-8 max-w-5xl mx-auto ">
-          {/* Upload zone */}
+        <div className="p-8 max-w-5xl mx-auto">
           <div
-            className={`mb-8 p-12 rounded-xl border-2 border-dashed transition-all cursor-pointer glass ${
+            className={`mb-8 p-12 rounded-xl border-2 border-dashed transition-all cursor-pointer bg-white/5 ${
               isDragging
                 ? "border-white/30 bg-white/10"
-                : "border-white/10 hover:border-white/20 bg-white/5"
+                : "border-white/10 hover:border-white/20"
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            onClick={openFilePicker}
           >
-            <div className="text-center ">
+            <div className="text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <UploadIcon className="w-8 h-8 text-gray-300" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 ">
+              <h3 className="text-lg font-semibold mb-2">
                 Drop files here or click to browse
               </h3>
               <p className="text-sm text-gray-400 mb-6">
                 Maximum file size: 50MB per file • Batch upload supported
               </p>
-
-              <Button onClick={openFilePicker} className="upload-btn bg-[#6b7280] hover:bg-[#5a6370] text-white font-semibold">
+              <Button
+                onClick={openFilePicker}
+                className="bg-[#6b7280] hover:bg-[#5a6370] text-white font-semibold"
+              >
                 Select Files
               </Button>
               <input
@@ -137,8 +178,6 @@ export default function Upload() {
               />
             </div>
           </div>
-
-          {/* Metadata */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -161,25 +200,25 @@ export default function Upload() {
               />
             </div>
           </div>
-
-          {/* Upload progress */}
           {files.length > 0 && (
-            <div className="p-6 rounded-xl glass">
+            <div className="p-6 rounded-xl bg-white/5">
               <h3 className="text-lg font-semibold mb-4">Upload Progress</h3>
               <div className="space-y-4">
                 {files.map((file) => (
                   <div
                     key={file.id}
-                    className="flex items-center gap-4 p-4 rounded-lg bg-white/5"
+                    className="flex items-center gap-4 p-4 rounded-lg bg-white/10"
                   >
                     <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
                       <FileText className="w-5 h-5 text-gray-300" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium truncate">{file.name}</p>
+                        <p className="font-medium truncate">
+                          {file.title || file.name}
+                        </p>
                         <div className="flex items-center gap-2">
-                          {file.status === "complete" ? (
+                          {file.status === "completed" ? (
                             <>
                               <CheckCircle2 className="w-4 h-4 text-green-400" />
                               <span className="text-sm text-green-400 font-medium">
@@ -190,7 +229,7 @@ export default function Upload() {
                             <>
                               <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                               <span className="text-sm text-gray-400 font-medium">
-                                {file.progress}%
+                                {file.progress}% {file.status}
                               </span>
                             </>
                           )}
@@ -199,7 +238,7 @@ export default function Upload() {
                       <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all duration-300 ${
-                            file.status === "complete"
+                            file.status === "completed"
                               ? "bg-green-400"
                               : "bg-gray-400"
                           }`}
