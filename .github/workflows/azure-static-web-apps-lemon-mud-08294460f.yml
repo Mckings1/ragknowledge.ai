@@ -24,39 +24,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'pnpm' # use pnpm cache when possible
+          cache: 'npm'
 
-      - name: Ensure pnpm is installed
+      - name: Install dependencies
         run: |
-          # prefer official pnpm installer, fall back to npm if needed
-          if ! command -v pnpm >/dev/null 2>&1; then
-            echo "pnpm not found — installing..."
-            npm install -g pnpm
-          else
-            echo "pnpm already installed"
-          fi
-
-      - name: Install dependencies (pnpm if available, else npm)
-        run: |
-          if [ -f "pnpm-lock.yaml" ]; then
-            echo "Using pnpm (pnpm-lock.yaml found)"
-            pnpm install --frozen-lockfile
-          elif [ -f "package-lock.json" ]; then
-            echo "Using npm (package-lock.json found)"
+          if [ -f "package-lock.json" ]; then
             npm ci
           else
-            echo "No lockfile found — using npm install"
             npm install
           fi
 
       - name: Build Next.js app for static export
         run: |
           export NEXT_TELEMETRY_DISABLED=1
-          if [ -f "pnpm-lock.yaml" ]; then
-            pnpm build
-          else
-            npm run build
-          fi
+          npm run build
 
       - name: Build And Deploy
         id: builddeploy
@@ -67,3 +48,16 @@ jobs:
           app_location: "/"
           api_location: ""
           output_location: "out"
+          skip_app_build: true  # Skip build since we already built above
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_MUD_08294460F }}
+          action: "close"
