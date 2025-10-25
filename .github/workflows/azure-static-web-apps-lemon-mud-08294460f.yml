@@ -24,11 +24,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'       # use pnpm cache since we enable pnpm below
+
+      - name: Enable Corepack and activate pnpm
+        run: |
+          # Corepack comes with Node 16.10+. This enables it and activates pnpm.
+          corepack enable
+          corepack prepare pnpm@latest --activate
 
       - name: Install dependencies
         run: |
-          if [ -f "package-lock.json" ]; then
+          # Prefer pnpm if repo has a pnpm lockfile, otherwise fall back to npm.
+          if [ -f "pnpm-lock.yaml" ]; then
+            pnpm install --frozen-lockfile
+          elif [ -f "package-lock.json" ]; then
             npm ci
           else
             npm install
