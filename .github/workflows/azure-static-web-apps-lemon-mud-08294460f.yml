@@ -16,47 +16,43 @@ jobs:
     name: Build and Deploy Job
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: |
-          npm ci || npm install
-          npm rebuild lightningcss --verbose
+          cd frontend
+          npm ci
 
-      - name: Build Next.js app
-        run: npm run build
-        env:
-          NODE_ENV: production
+      - name: Build Next.js (Static Export)
+        run: |
+          cd frontend
+          npm run build
 
-      - name: Build and Deploy to Azure Static Web Apps
-        id: builddeploy
+      - name: Deploy to Azure Static Web Apps
+        id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_MUD_08294460F }}
           action: "upload"
-          app_location: "/"
-          api_location: ""
-          output_location: "out" # or ".next" if you’re not using next export
+          app_location: "frontend"          # where your Next.js project lives
+          output_location: "frontend/out"   # where the static export lands
+          api_location: "backend"           # where your Azure Functions live (optional for now)
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
-
     steps:
       - name: Close Pull Request
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_MUD_08294460F }}
           action: "close"
